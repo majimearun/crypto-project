@@ -22,7 +22,10 @@ class BlockchainExplorer:
 
     def get_block(self, index: int, key: bytes):
         block = self.blockchain.chain[index]
-        decoded_string = Fernet(key).decrypt(block.data).decode()
-        decoded_string = decoded_string.replace("'", '"')
-        block.data = json.loads(decoded_string)
+        try:
+            decoded_string = Fernet(key).decrypt(block.data).decode()
+            decoded_string = decoded_string.replace("'", '"')
+            block.data = json.loads(decoded_string)
+        except:
+            print("wrong key, cannot decrypt data")
         return block

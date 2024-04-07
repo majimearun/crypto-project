@@ -49,4 +49,4 @@ print(explorer.verify_blockchain())
 print(explorer.get_block(1, bob.encryption_key).data)
 
 # will throw error
-# print(explorer.get_block(2, bob.encryption_key).data)
+print(explorer.get_block(2, bob.encryption_key).data)
