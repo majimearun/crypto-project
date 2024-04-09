@@ -22,6 +22,9 @@ class BlockchainExplorer:
 
     def get_block(self, index: int, key: bytes):
         block = self.blockchain.chain[index]
+        if self.verify_block(block) == False:
+            print("Block is tampered")
+            return None
         try:
             decoded_string = Fernet(key).decrypt(block.data).decode()
             decoded_string = decoded_string.replace("'", '"')
