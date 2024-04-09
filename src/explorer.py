@@ -16,9 +16,7 @@ class BlockchainExplorer:
         return (
             block.hash
             == hashlib.sha256(
-                str(
-                    block.studentID + str(block.courses) + str(block.timestamp)
-                ).encode()
+                str(block.studentID + str(block.data) + str(block.timestamp)).encode()
             ).hexdigest()
         )
 
