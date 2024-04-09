@@ -3,7 +3,7 @@ import datetime as dt
 
 
 class Transcript:
-    def __init__(self, studentID: str, data: str, previous_hash: str):
+    def __init__(self, studentID: str, data: bytes, previous_hash: str):
         self.studentID = studentID
         self.data = data
         self.timestamp = dt.datetime.now()
