@@ -23,7 +23,7 @@ class BlockchainExplorer:
     def get_block(self, index: int, key: bytes):
         block = self.blockchain.chain[index]
         if self.verify_block(block) == False:
-            print("Block is tampered")
+            print("Block is tampered or an invalid attempt is being made")
             return None
         try:
             decoded_string = Fernet(key).decrypt(block.data).decode()
