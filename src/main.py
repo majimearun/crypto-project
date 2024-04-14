@@ -5,7 +5,19 @@ from transcript import Transcript
 import datetime as dt
 from cryptography.fernet import Fernet
 
-print("Creating Students:")
+from university import University
+
+print("Creating a new University")
+uni = University("BITS Pilani", "1234")
+print("::>Adding courses to the University")
+uni.add_course("CS101", "Introduction to Computer Science")
+uni.add_course("CS211", "Data Structures and Algorithms")
+uni.add_course("CS212", "Database Management Systems")
+uni.add_course("CS213", "Object Oriented Programming")
+uni.add_course("CS303", "Computer Networks")
+uni.add_course("CS372", "Operating Systems")
+
+print("=================\nCreating Students:")
 print("::>Creating a new Student Bob")
 bob = Student(
     "2021A7PS0001H",
@@ -14,8 +26,9 @@ bob = Student(
     "M",
     20,
     dt.date(2001, 1, 1),
-    {"CS101": "A", "CS102": "B"},
+    {"CS101": "A", "CS303": "B"},
 )
+uni.add_student(bob)
 
 print("::>Creating a new Student Alice")
 alice = Student(
@@ -25,8 +38,9 @@ alice = Student(
     "F",
     20,
     dt.date(2001, 1, 1),
-    {"CS101": "A", "CS102": "B"},
+    {"CS101": "A", "CS303": "B"},
 )
+uni.add_student(alice)
 
 print("=================\nCreating a new Blockchain")
 blockchain = Blockchain()
