@@ -7,12 +7,16 @@ class ChallengeResponseAuthenticator:
         self.secret_key = secret_key
         self.n_rounds = n_rounds
 
-    def authenticate(self) -> bool:
+    def authenticate(self, testing: False) -> bool:
         for _ in range(self.n_rounds):
             challenge = input("Enter the challenge: ").encode()
             random_bit = str(0 if random.randint(0, 1) == 0 else 1).encode()
             print(f"Random bit: {random_bit}")
             print(f"Together: {challenge + random_bit}")
+            if testing:
+                HMAC = hmac.HMAC(self.secret_key, hashes.SHA256())
+                HMAC.update(challenge + random_bit)
+                print(f"[ONLY FOR TESTING]: {HMAC.finalize()}")
             response = input("Enter the response: ")
             response = eval(response)
             HMAC = hmac.HMAC(self.secret_key, hashes.SHA256())
