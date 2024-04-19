@@ -4,8 +4,8 @@ import course
 
 class University:
     def __init__(self, id: str, name: str):
-        self.universityID = id
-        self.universityName = name
+        self.university_id = id
+        self.university_name = name
         self.students = []
         self.courses = []
         

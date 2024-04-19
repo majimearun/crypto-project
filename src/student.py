@@ -10,8 +10,8 @@ class Student:
         age: int,
         dob: str,
     ):
-        self.studentID = student_id
-        self.studentName = student_name
+        self.student_id = student_id
+        self.student_name = student_name
         self.gender = gender
         self.age = age
         self.dob = dt.datetime.strptime(dob, "%Y-%m-%d")
