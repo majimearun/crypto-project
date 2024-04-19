@@ -1,91 +1,116 @@
-from blockchain import Blockchain
-from explorer import BlockchainExplorer
-from student import Student
-from transcript import Transcript
-import datetime as dt
-from cryptography.fernet import Fernet
+import authenticator
+import blockchain
+import random
+import student
+import university
+import company
+import course
+from cryptography.hazmat.primitives import hashes, hmac
 
-from university import University
+N_ROUNDS = 1
+DIFFICULTY = 4
 
-print("Creating a new University")
-uni = University("BITS Pilani", "1234")
-print("::>Adding courses to the University")
-uni.add_course("CS101", "Introduction to Computer Science")
-uni.add_course("CS211", "Data Structures and Algorithms")
-uni.add_course("CS212", "Database Management Systems")
-uni.add_course("CS213", "Object Oriented Programming")
-uni.add_course("CS303", "Computer Networks")
-uni.add_course("CS372", "Operating Systems")
+# create secret key
+SECRET_KEY = input("Enter secret key: ").encode()
 
-print("=================\nCreating Students:")
-print("::>Creating a new Student Bob")
-bob = Student(
-    "2021A7PS0001H",
-    "Bob",
-    2021,
-    "M",
-    20,
-    dt.date(2001, 1, 1),
-    {"CS101": "A", "CS303": "B"},
-)
-uni.add_student(bob)
+BLOCKCHAIN = blockchain.Blockchain(DIFFICULTY, SECRET_KEY)
 
-print("::>Creating a new Student Alice")
-alice = Student(
-    "2021A7PS0002H",
-    "Alice",
-    2021,
-    "F",
-    20,
-    dt.date(2001, 1, 1),
-    {"CS101": "A", "CS303": "B"},
-)
-uni.add_student(alice)
+# create university
+uni1 = university.University("1", "IIT Bombay")
+uni2 = university.University("2", "IIT Delhi")
+uni3 = university.University("3", "IIT Madras")
+uni4 = university.University("4", "BITS Pilani")
+uni5 = university.University("5", "BITS Hyderabad")
 
-print("=================\nCreating a new Blockchain")
-blockchain = Blockchain()
-explorer = BlockchainExplorer(blockchain)
+# create students
+student1 = student.Student("1", "Alice", "Female", 20, "2003-06-24")
+student2 = student.Student("2", "Bob", "Male", 20, "2003-06-24")
+student3 = student.Student("3", "Charlie", "Male", 20, "2003-06-24")
+student4 = student.Student("4", "David", "Male", 20, "2003-06-24")
+student5 = student.Student("5", "Eve", "Female", 20, "2003-06-24")
 
-print("::>Adding blocks to the blockchain: We first add bob's transcript")
-blockchain.add_block(
-    Transcript(
-        bob.studentID,
-        Fernet(bob.encryption_key).encrypt(str(bob.courses).encode()),
-        "0",
+student_ledger = [student1, student2, student3, student4, student5]
+
+
+# create companies
+company1 = company.Company("Adobe")
+company2 = company.Company("Microsoft")
+company3 = company.Company("Google")
+company4 = company.Company("Facebook")
+company5 = company.Company("Amazon")
+
+company_ledger = [company1, company2, company3, company4, company5]
+
+# create courses
+course1 = course.Course("1", "Blockchain", 3)
+course2 = course.Course("2", "Cryptography", 4)
+course3 = course.Course("3", "AI", 2)
+course4 = course.Course("4", "ML", 5)
+course5 = course.Course("5", "DL", 2)
+
+course_ledger = [course1, course2, course3, course4, course5]
+
+# seed data
+for stud in student_ledger:
+    uni1.add_student(stud)
+    uni2.add_student(stud)
+    uni3.add_student(stud)
+    uni4.add_student(stud)
+    uni5.add_student(stud)
+
+for c in course_ledger:
+    uni1.add_course(c)
+    uni2.add_course(c)
+    uni3.add_course(c)
+    uni4.add_course(c)
+    uni5.add_course(c)
+
+
+# add some transactions
+for i in range(10):
+    uni = random.choice([uni1, uni2, uni3, uni4, uni5])
+    stud = random.choice(student_ledger)
+    course = random.choice(course_ledger)
+    grade = random.randint(1, 10)
+    transaction = blockchain.Transaction(
+        uni.university_id, stud.student_id, course.code, grade
     )
-)
-print("::>Adding blocks to the blockchain: We then add alice's transcript")
-blockchain.add_block(
-    Transcript(
-        alice.studentID,
-        Fernet(alice.encryption_key).encrypt(str(alice.courses).encode()),
-        "0",
-    )
-)
+    HMAC = hmac.HMAC(SECRET_KEY, hashes.SHA256())
+    HMAC.update(transaction.to_bytes())
+    signature = HMAC.finalize()
+    BLOCKCHAIN.add_transaction(transaction, signature)
 
-print("=================\nVerifying the blockchain: ", explorer.verify_blockchain())
+    if i % 2 == 0:
+        BLOCKCHAIN.mine()
 
-print("=================\nGetting the block data for Bob")
-try:
-    print("\n::>Attempting to get the block data for Bob with Bob's encryption key")
-    print(explorer.get_block(1, bob.encryption_key).data)
-except:
-    print("::>[ERROR] Could not get the block data for Bob")
-    
-try:
-    print("\n::>Attempting to get the block data for Bob's record with Alice's encryption key")
-    print(explorer.get_block(1, alice.encryption_key).data)
-except:
-    print("::>[ERROR] Could not get the block data for Bob")
 
-try:
-    print("\n::>Attempting to get the block data for a alice's record with Bob's encryption key")
-    print(explorer.get_block(2, bob.encryption_key).data)
-except:
-    print("::>[ERROR] Could not get the block data for Bob")
-    
-try:
-    print("\n::>Attempting to get the block data for a alice's record with alice's encryption key")
-    print(explorer.get_block(2, alice.encryption_key).data)
-except:
-    print("::>[ERROR] Could not get the block data for Bob")
+print("Login as ...\n1. University\n2. Student\n3. Company")
+choice = input("Enter choice: ")
+match choice:
+    case "3":
+        name = input("enter company name: ")
+        flag = False
+        for company in company_ledger:
+            if company.name == name:
+                flag = True
+                break
+        if not flag:
+            print("Company not found")
+            exit()
+        authenticator = authenticator.ChallengeResponseAuthenticator(
+            SECRET_KEY, N_ROUNDS
+        )
+        if authenticator.authenticate(True):
+            print("Authenticated...")
+            print("Access granted")
+            print(f"Welcome {name}")
+            print("1. View Student Transcript")
+            print("2. Exit")
+            choice = input("Enter choice: ")
+            match choice:
+                case "1":
+                    university_id = input("Enter university id: ")
+                    student_id = input("Enter student id: ")
+                    print(BLOCKCHAIN.view_student_transcript(university_id, student_id))
+                case "2":
+                    exit()
