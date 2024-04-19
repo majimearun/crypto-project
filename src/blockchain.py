@@ -151,14 +151,19 @@ class Blockchain:
             previous_hash = block.hash
         return True
 
-    def view_student_transcript(self, student_id: str) -> tuple[bool, dict]:
+    def view_student_transcript(
+        self, university_id: str, student_id: str
+    ) -> tuple[bool, dict]:
         if not self.is_chain_valid():
             return False, {}
         student_transcript = {}
         for block in self.chain:
             for transaction in block.transactions:
                 transaction = Transaction(**transaction)
-                if transaction.student_id == student_id:
+                if (
+                    transaction.student_id == student_id
+                    and transaction.university_id == university_id
+                ):
                     student_transcript[transaction.course_id] = transaction.grade
         return True, student_transcript
 
