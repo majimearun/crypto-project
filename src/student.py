@@ -1,38 +1,32 @@
 import datetime as dt
-from cryptography.fernet import Fernet
 
 
 class Student:
     def __init__(
         self,
-        studentID: str,
-        studentName: str,
-        yearOfJoining: int,
+        student_id: str,
+        student_name: str,
         gender: str,
         age: int,
-        dob: dt.date,
-        courses: dict[str, str] = {},
+        dob: str,
     ):
-        self.studentID = studentID
-        self.studentName = studentName
-        self.yearOfJoining = yearOfJoining
+        self.studentID = student_id
+        self.studentName = student_name
         self.gender = gender
         self.age = age
-        self.dob = dob
-        self.courses = {course: grade for course, grade in courses.items()}
-        self.encryption_key = Fernet.generate_key()
-        
+        self.dob = dt.datetime.strptime(dob, "%Y-%m-%d")
+
+    def __str__(self) -> str:
+        return f"{self.studentName} is a {self.age} year old {self.gender} with ID {self.studentID}"
 
 
 if __name__ == "__main__":
     student = Student(
-        "2021A7PS0001H",
-        "Alice",
-        2021,
-        "F",
+        "2021A7PS0205H",
+        "Arunachala",
+        "Male",
         20,
-        dt.date(2001, 1, 1),
-        {"CS101": "A", "CS102": "B"},
+        "2003-06-24",
     )
-    print(student.encryption_key)
-        
+    
+    print(student)
