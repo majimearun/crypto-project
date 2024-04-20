@@ -3,9 +3,8 @@
 
 ## TODO
 
-- [ ] Add login and interaction for all kinds of users
 - [ ] Add error handling and proper error messages
-- [ ] Create a separate seed file
-- [ ] (optional) Convert to a web server
-- [ ] Comment/document code
-- [ ] Test 
+- [ ] Clean code
+- [ ] Test
+- [ ] Make output prettier and more detailed
+- [ ] Comment/document code 
