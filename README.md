@@ -4,4 +4,5 @@
 ## TODO
 
 - [ ] Test
-- [ ] Comment/document code 
+- [ ] Clean code
+- [ ] Comments
