@@ -104,7 +104,7 @@ def university_login():
                             break
                         course_code = input("Enter course code: ")
                     name = input("Enter course name: ")
-                    credits = input("Enter credits of course: ")
+                    credits = int(input("Enter credits of course: "))
                     cour = Course(course_code, name, credits)
                     uni.add_course(cour)
                     BLOCKCHAIN.ledger["course"].append(cour)
