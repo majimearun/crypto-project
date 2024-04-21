@@ -14,11 +14,13 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--difficulty", type=int, default=2)
 parser.add_argument("--testing", type=bool, default=False)
 parser.add_argument("--rounds", type=int, default=1)
+parser.add_argument("--block_size", type=int, default=10)
 args = parser.parse_args()
 
 N_ROUNDS = args.rounds
 DIFFICULTY = args.difficulty
 TESTING = args.testing
+BLOCK_SIZE = args.block_size
 
 # create some transactions in the block chain
 data = Data()
@@ -30,7 +32,9 @@ ledger = {
 }
 
 BLOCKCHAIN = blockchain.Blockchain(DIFFICULTY, ledger)
-
+BLOCKCHAIN_2 = blockchain.Blockchain(DIFFICULTY, ledger)
+BLOCKCHAIN.peers = [BLOCKCHAIN_2]
+BLOCKCHAIN_2.peers = [BLOCKCHAIN]
 
 for i in range(1, 109):
     uni = random.choice(BLOCKCHAIN.ledger["university"])
@@ -45,11 +49,11 @@ for i in range(1, 109):
     signature = HMAC.finalize()
     BLOCKCHAIN.add_transaction(transaction, signature, True, TESTING)
 
-    if i % 10 == 0:
+    if i % BLOCK_SIZE == 0:
         BLOCKCHAIN.mine()
 
 
-def university_login():
+def university_login(BLOCKCHAIN):
     print("----------------------------------------------------------")
     print("---------------------University Login---------------------")
     print("----------------------------------------------------------")
@@ -139,7 +143,7 @@ def university_login():
                         print("Transaction added successfully")
                     else:
                         print("Transaction failed")
-                    if len(BLOCKCHAIN.temp_transactions) == 10:
+                    if len(BLOCKCHAIN.temp_transactions) == BLOCK_SIZE:
                         BLOCKCHAIN.mine()
                 case "4":
                     student_id = input("Enter student id: ")
@@ -166,7 +170,7 @@ def university_login():
                     print("Invalid choice")
 
 
-def company_login():
+def company_login(BLOCKCHAIN):
     print("----------------------------------------------------------")
     print("----------------------Company Login-----------------------")
     print("----------------------------------------------------------")
@@ -210,7 +214,7 @@ def company_login():
                     print("Invalid choice")
 
 
-def student_login():
+def student_login(BLOCKCHAIN):
     print("----------------------------------------------------------")
     print("----------------------Student Login-----------------------")
     print("----------------------------------------------------------")
@@ -262,7 +266,7 @@ def student_login():
                     print("Invalid choice")
 
 
-def new_user():
+def new_user(BLOCKCHAIN):
     print("----------------------------------------------------------")
     print("----------------------New User Login----------------------")
     print("----------------------------------------------------------")
@@ -287,6 +291,8 @@ def new_user():
                 return
             uni = University(university_id, name)
             BLOCKCHAIN.ledger["university"].append(uni)
+            for peer in BLOCKCHAIN.peers:
+                peer.ledger["university"].append(uni)
             print("University added successfully")
         case "2":
             name = input("Enter company name: ")
@@ -295,6 +301,8 @@ def new_user():
                 return
             comp = Company(name)
             BLOCKCHAIN.ledger["company"].append(comp)
+            for peer in BLOCKCHAIN.peers:
+                peer.ledger["company"].append(comp)
             print("Company added successfully")
         case _:
             print("Invalid choice")
@@ -302,19 +310,31 @@ def new_user():
 
 if __name__ == "__main__":
     while True:
+        print("----------------------------------------------------------")
+        print("----------------------Main Menu---------------------------")
+        print("---------------------Choose BlockChain---------------------")
+        inp = input("Enter choice: ")
+        match inp:
+            case "1":
+                BC = BLOCKCHAIN
+            case "2":
+                BC = BLOCKCHAIN_2
+            case _:
+                print("Invalid choice")
+                continue
         print(
             "Login as ...\n0. New user\n1. University\n2. Student\n3. Company\n4. Exit"
         )
         choice = input("Enter choice: ")
         match choice:
             case "0":
-                new_user()
+                new_user(BC)
             case "1":
-                university_login()
+                university_login(BC)
             case "2":
-                student_login()
+                student_login(BC)
             case "3":
-                company_login()
+                company_login(BC)
             case "4":
                 break
             case _:

@@ -49,11 +49,12 @@ class Block:
 
 
 class Blockchain:
-    def __init__(self, difficulty: int, ledger: dict = None):
+    def __init__(self, difficulty: int, ledger: dict = None, peers: list = None):
         self.chain: list[Block] = [self.create_genesis_block()]
         self.difficulty = difficulty
         self.temp_transactions: list[Transaction] = []
         self.ledger = ledger
+        self.peers = peers
 
     def last_block(self) -> Block:
         return self.chain[-1]
@@ -163,6 +164,8 @@ class Blockchain:
             print("New Block Found")
             if print_block:
                 print(block)
+        for peer in self.peers:
+            peer.add_block(block, block.hash)
         return
 
     def is_chain_valid(self) -> bool:
