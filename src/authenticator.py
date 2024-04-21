@@ -1,6 +1,8 @@
-from cryptography.hazmat.primitives import hashes, hmac
 import os
 import random
+
+from cryptography.hazmat.primitives import hashes, hmac
+
 
 class ChallengeResponseAuthenticator:
     def __init__(self, secret_key: bytes, n_rounds: int = 1):
@@ -14,11 +16,18 @@ class ChallengeResponseAuthenticator:
             print(f"Random bit: {random_bit}")
             print(f"Together: {challenge + random_bit}")
             if testing:
+                print(
+                    "Testing mode, printing the required HMAC response for ease of testing..."
+                )
                 HMAC = hmac.HMAC(self.secret_key, hashes.SHA256())
                 HMAC.update(challenge + random_bit)
-                print(f"[ONLY FOR TESTING]: {HMAC.finalize()}")
+                print(f"[::>ONLY FOR TESTING]: {HMAC.finalize()}")
             response = input("Enter the response: ")
-            response = eval(response)
+            try:
+                response = eval(response)
+            except:
+                print("Invalid response")
+                return False
             HMAC = hmac.HMAC(self.secret_key, hashes.SHA256())
             HMAC.update(challenge + random_bit)
             try:
