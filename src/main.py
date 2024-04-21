@@ -102,6 +102,8 @@ def university_login(BLOCKCHAIN):
                         continue
                     uni.add_student(stud)
                     BLOCKCHAIN.ledger["student"].append(stud)
+                    for peer in BLOCKCHAIN.peers:
+                        peer.ledger["student"].append(stud)
                     print("Student added successfully:")
                     print(stud)
                 case "2":
@@ -119,6 +121,8 @@ def university_login(BLOCKCHAIN):
                     cour = Course(course_code, name, credits)
                     uni.add_course(cour)
                     BLOCKCHAIN.ledger["course"].append(cour)
+                    for peer in BLOCKCHAIN.peers:
+                        peer.ledger["course"].append(cour)
                     print("Course added successfully:")
                     print(cour)
                 case "3":
