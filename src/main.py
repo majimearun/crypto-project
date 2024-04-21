@@ -45,7 +45,7 @@ def university_login():
         print("University not found")
         return
 
-    auth = authenticator.ChallengeResponseAuthenticator(SECRET_KEY, N_ROUNDS)
+    auth = authenticator.ChallengeResponseAuthenticator(university.secret_key, N_ROUNDS)
     if auth.authenticate(TESTING):
         print("Authenticated...")
         print("Access granted")
@@ -111,7 +111,7 @@ def company_login():
     if not flag:
         print("Company not found")
         return
-    auth = authenticator.ChallengeResponseAuthenticator(SECRET_KEY, N_ROUNDS)
+    auth = authenticator.ChallengeResponseAuthenticator(company.secret_key, N_ROUNDS)
     if auth.authenticate(TESTING):
         print("Authenticated...")
         print("Access granted")
@@ -162,7 +162,7 @@ def student_login():
     if not flag:
         print("Student not found")
         return
-    auth = authenticator.ChallengeResponseAuthenticator(SECRET_KEY, N_ROUNDS)
+    auth = authenticator.ChallengeResponseAuthenticator(student.secret_key, N_ROUNDS)
     if auth.authenticate(TESTING):
         print("Authenticated...")
         print("Access granted")

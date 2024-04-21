@@ -1,4 +1,5 @@
 import datetime as dt
+import os
 
 
 class Student:
@@ -13,6 +14,8 @@ class Student:
         self.student_name = student_name
         self.gender = gender
         self.dob = dt.datetime.strptime(dob, "%Y-%m-%d")
+        self.secret_key = os.urandom(16)
+        print(f"Secret Key for {self.student_name}: {self.secret_key}")
 
     def __str__(self) -> str:
         return f"{self.student_name} is a {self.gender} student born on {self.dob} with ID {self.student_id}"

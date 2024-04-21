@@ -1,5 +1,6 @@
 import student
 import course
+import os
 
 
 class University:
@@ -8,13 +9,15 @@ class University:
         self.university_name = name
         self.students = []
         self.courses = []
-        
+        self.secret_key = os.urandom(16)
+        print(f"Secret Key for {self.university_name}: {self.secret_key}")
+
     def add_student(self, student: student.Student):
         self.students.append(student)
-        
+
     def add_course(self, course: course.Course):
         self.courses.append(course)
-        
+
     def __str__(self) -> str:
         return f"{self.university_name} has {len(self.students)} students and {len(self.courses)} courses."
 
@@ -23,11 +26,11 @@ if __name__ == "__main__":
     uni = University("BITS", "BITS Pilani")
     print(uni)
     student1 = student.Student("2021A7PS0205H", "Arun", "male", "2003-06-24")
-    uni.add_student(student1)   
+    uni.add_student(student1)
     student2 = student.Student("2021A7PS0206H", "Arunachala", "male", "2003-06-24")
     uni.add_student(student2)
-    
+
     course1 = course.Course("Blockchain", "CS101", 4)
     uni.add_course(course1)
-    
+
     print(uni)
