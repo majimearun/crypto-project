@@ -1,4 +1,3 @@
-import random
 import student
 import university
 import company

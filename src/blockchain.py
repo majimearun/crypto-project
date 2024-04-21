@@ -36,6 +36,7 @@ class Block:
         self.timestamp = timestamp
         self.previous_hash = previous_hash
         self.nonce = nonce
+        self.hash = self.calculate_hash()
 
     def calculate_hash(self) -> bytes:
         in_dict = self.__dict__.copy()
@@ -133,10 +134,11 @@ class Blockchain:
             print("Error Mining Block")
             return False
 
-    def announce_new_block(self, block: Block) -> None:
+    def announce_new_block(self, block: Block, print_block: bool = False) -> None:
         if self.is_valid_proof(block, block.hash):
             print("New Block Found")
-            print(block)
+            if print_block:
+                print(block)
         return
 
     def is_chain_valid(self) -> bool:
@@ -170,14 +172,16 @@ class Blockchain:
 
 if __name__ == "__main__":
     blockchain = Blockchain(2)
-    transaction = Transaction("VIT", "2021A7PS0205H", "CS101", 10)
+    transaction = Transaction("BITS", "2021A7PS0205H", "CS101", 10)
     HMAC = hmac.HMAC(blockchain.secret_key, hashes.SHA256())
     HMAC.update(transaction.to_bytes())
     signature = HMAC.finalize()
+    
+    # will print invalid signature
     if blockchain.add_transaction(transaction, b"wrong_signature"):
         blockchain.mine()
 
     if blockchain.add_transaction(transaction, signature):
         blockchain.mine()
 
-    print(blockchain.view_student_transcript("2021A7PS0205H")[1])
+    print(blockchain.view_student_transcript("BITS", "2021A7PS0205H")[1])

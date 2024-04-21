@@ -28,6 +28,7 @@ class ChallengeResponseAuthenticator:
             except:
                 print("Invalid response")
                 return False
+            
             HMAC = hmac.HMAC(self.secret_key, hashes.SHA256())
             HMAC.update(challenge + random_bit)
             try:
