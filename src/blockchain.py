@@ -6,14 +6,14 @@ import os
 
 
 class Transaction:
-    def __init__(self, university_id: str, student_id: str, course_id: str, grade: int):
+    def __init__(self, university_id: str, student_id: str, code: str, grade: int):
         self.university_id = university_id
         self.student_id = student_id
-        self.course_id = course_id
+        self.code = code
         self.grade = grade
 
     def __str__(self) -> str:
-        return f"{self.student_id} received {self.grade} in {self.course_id} from {self.university_id}"
+        return f"{self.student_id} received {self.grade} in {self.code} from {self.university_id}"
 
     def to_dict(self) -> dict:
         return self.__dict__
@@ -49,15 +49,10 @@ class Block:
 
 
 class Blockchain:
-    def __init__(self, difficulty: int, secret_key: bytes = None, ledger: dict = None):
+    def __init__(self, difficulty: int, ledger: dict = None):
         self.chain: list[Block] = [self.create_genesis_block()]
         self.difficulty = difficulty
         self.temp_transactions: list[Transaction] = []
-        if secret_key is None:
-            print("Secret Key not provided, generating random key")
-            secret_key = os.urandom(256)
-            print(f"Secret Key: {secret_key}")
-        self.secret_key = secret_key
         self.ledger = ledger
 
     def last_block(self) -> Block:
@@ -92,21 +87,37 @@ class Blockchain:
         return True
 
     def logical_transaction_check(self, transaction: Transaction) -> bool:
-        if transaction.university_id not in self.ledger["university"]:
+        for uni in self.ledger["university"]:
+            if uni.university_id == transaction.university_id:
+                for cour in uni.courses:
+                    if cour.code == transaction.code:
+                        break
+                else:
+                    print("Course not found")
+                    return False
+                for stud in uni.students:
+                    if stud.student_id == transaction.student_id:
+                        break
+                else:
+                    print("Student not found")
+                    return False
+                break
+        else:
+            print("University not found")
             return False
-        for university in self.ledger["university"]:
-            if university.university_id == transaction.university_id:
-                if transaction.course_id not in university.courses:
-                    return False
-                if transaction.student_id not in university.students:
-                    return False
         if transaction.grade < 0 or transaction.grade > 10:
             return False
         return True
 
     def verify_transaction_hmac(self, transaction: Transaction, original_hmac) -> bool:
+        uni_id = transaction.university_id
+        secret_key = None
+        for university in self.ledger["university"]:
+            if university.university_id == uni_id:
+                secret_key = university.secret_key
+                break
         in_bytes = transaction.to_bytes()
-        HMAC = hmac.HMAC(self.secret_key, hashes.SHA256())
+        HMAC = hmac.HMAC(secret_key, hashes.SHA256())
         HMAC.update(in_bytes)
         try:
             HMAC.verify(original_hmac)
@@ -175,22 +186,35 @@ class Blockchain:
                     transaction.student_id == student_id
                     and transaction.university_id == university_id
                 ):
-                    student_transcript[transaction.course_id] = transaction.grade
+                    student_transcript[transaction.code] = transaction.grade
         return True, student_transcript
 
 
 if __name__ == "__main__":
-    blockchain = Blockchain(2)
+    import university
+    import student
+    import course
+    uni = university.University("BITS", "BITS Pilani")
+    student1 = student.Student("2021A7PS0205H", "Arun", "male", "2003-06-24")
+    uni.add_student(student1)
+    course1 = course.Course("Blockchain", "CS101", 4)
+    uni.add_course(course1)
+    key = uni.secret_key
+    blockchain = Blockchain(2, {"university": [uni], "student": [], "course": []})
     transaction = Transaction("BITS", "2021A7PS0205H", "CS101", 10)
-    HMAC = hmac.HMAC(blockchain.secret_key, hashes.SHA256())
+    HMAC = hmac.HMAC(key, hashes.SHA256())
     HMAC.update(transaction.to_bytes())
     signature = HMAC.finalize()
-    
+
     # will print invalid signature
     if blockchain.add_transaction(transaction, b"wrong_signature"):
         blockchain.mine()
+    else:
+        print("Transaction failed")
 
     if blockchain.add_transaction(transaction, signature):
         blockchain.mine()
+    else:
+        print("Transaction failed")
 
     print(blockchain.view_student_transcript("BITS", "2021A7PS0205H")[1])

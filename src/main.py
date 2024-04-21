@@ -19,8 +19,7 @@ ledger = {
     "company": data.company_ledger,
 }
 
-SECRET_KEY = input("Enter secret key: ").encode()
-BLOCKCHAIN = blockchain.Blockchain(DIFFICULTY, SECRET_KEY, ledger)
+BLOCKCHAIN = blockchain.Blockchain(DIFFICULTY, ledger)
 
 
 for i in range(1, 101):
@@ -31,7 +30,7 @@ for i in range(1, 101):
     transaction = blockchain.Transaction(
         uni.university_id, stud.student_id, cour.code, grade
     )
-    HMAC = hmac.HMAC(SECRET_KEY, hashes.SHA256())
+    HMAC = hmac.HMAC(uni.secret_key, hashes.SHA256())
     HMAC.update(transaction.to_bytes())
     signature = HMAC.finalize()
     BLOCKCHAIN.add_transaction(transaction, signature)
