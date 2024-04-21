@@ -36,7 +36,7 @@ for i in range(1, 101):
     HMAC = hmac.HMAC(uni.secret_key, hashes.SHA256())
     HMAC.update(transaction.to_bytes())
     signature = HMAC.finalize()
-    BLOCKCHAIN.add_transaction(transaction, signature)
+    BLOCKCHAIN.add_transaction(transaction, signature, True)
 
     if i % 10 == 0:
         BLOCKCHAIN.mine()

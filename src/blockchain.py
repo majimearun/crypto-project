@@ -3,6 +3,8 @@ import json
 import hashlib
 import datetime as dt
 from authenticator import ChallengeResponseAuthenticator
+
+
 class Transaction:
     def __init__(self, university_id: str, student_id: str, code: str, grade: int):
         self.university_id = university_id
@@ -107,7 +109,9 @@ class Blockchain:
             return False
         return True
 
-    def verify_transaction_hmac(self, transaction: Transaction, original_hmac) -> bool:
+    def verify_transaction_hmac(
+        self, transaction: Transaction, original_hmac, seeding=False
+    ) -> bool:
         uni_id = transaction.university_id
         secret_key = None
         for university in self.ledger["university"]:
@@ -115,7 +119,7 @@ class Blockchain:
                 secret_key = university.secret_key
                 break
         auth = ChallengeResponseAuthenticator(secret_key)
-        if auth.authenticate(True):
+        if seeding or auth.authenticate(True):
             in_bytes = transaction.to_bytes()
             HMAC = hmac.HMAC(secret_key, hashes.SHA256())
             HMAC.update(in_bytes)
@@ -126,9 +130,9 @@ class Blockchain:
                 print("Invalid Signature")
                 return False
 
-    def add_transaction(self, transaction: Transaction, signature: bytes) -> bool:
+    def add_transaction(self, transaction: Transaction, signature: bytes, seeding = False) -> bool:
         verification = self.verify_transaction_hmac(
-            transaction, signature
+            transaction, signature, seeding
         ) and self.logical_transaction_check(transaction)
         if not verification:
             return False
@@ -188,7 +192,7 @@ class Blockchain:
                     and transaction.university_id == university_id
                 ):
                     student_transcript[transaction.code] = transaction.grade
-                    
+
         ncreds = 0
         value = 0
         for university in self.ledger["university"]:
@@ -201,10 +205,8 @@ class Blockchain:
                     value += course.credits * student_transcript[course_code]
                     break
         return True, student_transcript, value / ncreds
-    
-    def view_uni_grades(
-        self, university_id: str
-    ) -> tuple[bool, list[tuple]]:
+
+    def view_uni_grades(self, university_id: str) -> tuple[bool, list[tuple]]:
         if not self.is_chain_valid():
             return False, ()
         uni_grades = []
@@ -212,7 +214,9 @@ class Blockchain:
             for transaction in block.transactions:
                 transaction = Transaction(**transaction)
                 if transaction.university_id == university_id:
-                    uni_grades.append((transaction.student_id, transaction.code, transaction.grade))
+                    uni_grades.append(
+                        (transaction.student_id, transaction.code, transaction.grade)
+                    )
         return True, uni_grades
 
 
@@ -220,6 +224,7 @@ if __name__ == "__main__":
     import university
     import student
     import course
+
     uni = university.University("BITS", "BITS Pilani")
     student1 = student.Student("2021A7PS0205H", "Arun", "male", "2003-06-24")
     uni.add_student(student1)
