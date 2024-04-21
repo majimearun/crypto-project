@@ -18,3 +18,12 @@
     poetry install # installs the dependencies
     ```
 5. run `main.py` from this virtual environment to run the project.
+
+## Files 
+
+1. `authenticator.py` - Contains class and function for challenge response authentication.
+2. `blockchain.py` - Contains class and all the required functions for blockchain (block mining, validitating blockchin, verification of transactions and viewing transactions and other util functions as well).
+3. `company.py`, `university.py`, `student.py` - Contains classes for company, university and student respectively (users).
+4. `main.py` - Contains the main function to run the project.
+5. `seed.py` - Contains seed data for the project.
+6. `get_response.py` - Contains a script which generates the required CRA + HMAC response.
