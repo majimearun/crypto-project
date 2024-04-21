@@ -43,7 +43,7 @@ for i in range(1, 101):
     HMAC = hmac.HMAC(uni.secret_key, hashes.SHA256())
     HMAC.update(transaction.to_bytes())
     signature = HMAC.finalize()
-    BLOCKCHAIN.add_transaction(transaction, signature, True)
+    BLOCKCHAIN.add_transaction(transaction, signature, True, TESTING)
 
     if i % 10 == 0:
         BLOCKCHAIN.mine()
@@ -133,7 +133,9 @@ def university_login():
                     HMAC = hmac.HMAC(uni.secret_key, hashes.SHA256())
                     HMAC.update(transaction.to_bytes())
                     signature = HMAC.finalize()
-                    if BLOCKCHAIN.add_transaction(transaction, signature):
+                    if BLOCKCHAIN.add_transaction(
+                        transaction, signature, False, TESTING
+                    ):
                         print("Transaction added successfully")
                     else:
                         print("Transaction failed")

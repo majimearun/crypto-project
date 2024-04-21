@@ -110,7 +110,7 @@ class Blockchain:
         return True
 
     def verify_transaction_hmac(
-        self, transaction: Transaction, original_hmac, seeding=False
+        self, transaction: Transaction, original_hmac, seeding=False, testing=False
     ) -> bool:
         uni_id = transaction.university_id
         secret_key = None
@@ -119,7 +119,7 @@ class Blockchain:
                 secret_key = university.secret_key
                 break
         auth = ChallengeResponseAuthenticator(secret_key)
-        if seeding or auth.authenticate(True):
+        if seeding or auth.authenticate(testing):
             in_bytes = transaction.to_bytes()
             HMAC = hmac.HMAC(secret_key, hashes.SHA256())
             HMAC.update(in_bytes)
@@ -130,9 +130,9 @@ class Blockchain:
                 print("Invalid Signature")
                 return False
 
-    def add_transaction(self, transaction: Transaction, signature: bytes, seeding = False) -> bool:
+    def add_transaction(self, transaction: Transaction, signature: bytes, seeding = False, testing = False) -> bool:
         verification = self.verify_transaction_hmac(
-            transaction, signature, seeding
+            transaction, signature, seeding, testing
         ) and self.logical_transaction_check(transaction)
         if not verification:
             return False
