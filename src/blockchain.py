@@ -2,7 +2,7 @@ from cryptography.hazmat.primitives import hashes, hmac
 import json
 import hashlib
 import datetime as dt
-
+from authenticator import ChallengeResponseAuthenticator
 class Transaction:
     def __init__(self, university_id: str, student_id: str, code: str, grade: int):
         self.university_id = university_id
@@ -114,15 +114,17 @@ class Blockchain:
             if university.university_id == uni_id:
                 secret_key = university.secret_key
                 break
-        in_bytes = transaction.to_bytes()
-        HMAC = hmac.HMAC(secret_key, hashes.SHA256())
-        HMAC.update(in_bytes)
-        try:
-            HMAC.verify(original_hmac)
-            return True
-        except:
-            print("Invalid Signature")
-            return False
+        auth = ChallengeResponseAuthenticator(secret_key)
+        if auth.authenticate(True):
+            in_bytes = transaction.to_bytes()
+            HMAC = hmac.HMAC(secret_key, hashes.SHA256())
+            HMAC.update(in_bytes)
+            try:
+                HMAC.verify(original_hmac)
+                return True
+            except:
+                print("Invalid Signature")
+                return False
 
     def add_transaction(self, transaction: Transaction, signature: bytes) -> bool:
         verification = self.verify_transaction_hmac(
