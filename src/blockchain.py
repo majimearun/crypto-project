@@ -92,6 +92,14 @@ class Blockchain:
         return True
 
     def logical_transaction_check(self, transaction: Transaction) -> bool:
+        if transaction.university_id not in self.ledger["university"]:
+            return False
+        for university in self.ledger["university"]:
+            if university.university_id == transaction.university_id:
+                if transaction.course_id not in university.courses:
+                    return False
+                if transaction.student_id not in university.students:
+                    return False
         if transaction.grade < 0 or transaction.grade > 10:
             return False
         return True
