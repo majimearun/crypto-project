@@ -5,6 +5,7 @@ from cryptography.hazmat.primitives import hashes, hmac
 import random
 import student
 import course
+import json
 
 N_ROUNDS = 1
 DIFFICULTY = 4
@@ -62,7 +63,9 @@ def university_login():
             print("----------------------------------------------------------")
             print("1. Add Student")
             print("2. Add Course")
-            print("3. Exit")
+            print("3. Create new entry")
+            print("4. View student transcript")
+            print("5. Exit")
             choice = input("Enter choice: ")
             match choice:
                 case "1":
@@ -78,7 +81,11 @@ def university_login():
                     name = input("Enter student name: ")
                     gender = input("Enter gender of student: ")
                     dob = input("Enter date of birth of student (yyyy-mm-dd): ")
-                    stud = student.Student(student_id, name, gender, dob)
+                    try:
+                        stud = student.Student(student_id, name, gender, dob)
+                    except:
+                        print("Invalid date of birth")
+                        continue
                     university.add_student(stud)
                     BLOCKCHAIN.ledger["student"].append(stud)
                     print("Student added successfully:")
@@ -101,6 +108,46 @@ def university_login():
                     print("Course added successfully:")
                     print(cour)
                 case "3":
+                    while True:
+                        student_id = input("Enter student id: ")
+                        if any(
+                            student.student_id == student_id
+                            for student in university.students
+                        ):
+                            break
+                    while True:
+                        course_code = input("Enter course code: ")
+                        if any(
+                            course.code == course_code for course in university.courses
+                        ):
+                            break
+                    grade = int(input("Enter grade: "))
+                    transaction = blockchain.Transaction(
+                        university.university_id, student_id, course_code, grade
+                    )
+                    HMAC = hmac.HMAC(university.secret_key, hashes.SHA256())
+                    HMAC.update(transaction.to_bytes())
+                    signature = HMAC.finalize()
+                    if BLOCKCHAIN.add_transaction(transaction, signature):
+                        print("Transaction added successfully")
+                    else:
+                        print("Transaction failed")
+                    if len(BLOCKCHAIN.temp_transactions) == 10:
+                        BLOCKCHAIN.mine()
+                case "4":
+                    university_id = input("Enter university id: ")
+                    student_id = input("Enter student id: ")
+                    found, transcript = BLOCKCHAIN.view_student_transcript(
+                        university_id, student_id
+                    )
+                    if found:
+                        json_transcript = json.dumps(transcript, indent=4)
+                        print(json_transcript)
+                    else:
+                        print(
+                            "Error viewing transcript, either student or university not found"
+                        )
+                case "5":
                     return
                 case _:
                     print("Invalid choice")
@@ -137,7 +184,8 @@ def company_login():
                         university_id, student_id
                     )
                     if found:
-                        print(transcript)
+                        json_transcript = json.dumps(transcript, indent=4)
+                        print(json_transcript)
                     else:
                         print(
                             "Error viewing transcript, either student or university not found"
@@ -186,7 +234,8 @@ def student_login():
                         university.university_id, student_id
                     )
                     if found:
-                        print(transcript)
+                        json_transcript = json.dumps(transcript, indent=4)
+                        print(json_transcript)
                     else:
                         print(
                             "Error viewing transcript, either student or university not found"
