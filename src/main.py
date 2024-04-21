@@ -8,16 +8,25 @@ import course
 
 N_ROUNDS = 1
 DIFFICULTY = 4
-SECRET_KEY = input("Enter secret key: ").encode()
-BLOCKCHAIN = blockchain.Blockchain(DIFFICULTY, SECRET_KEY)
 TESTING = True
 
 # create some transactions in the block chain
 data = Data()
+ledger = {
+    "university": data.university_ledger,
+    "student": data.student_ledger,
+    "course": data.course_ledger,
+    "company": data.company_ledger,
+}
+
+SECRET_KEY = input("Enter secret key: ").encode()
+BLOCKCHAIN = blockchain.Blockchain(DIFFICULTY, SECRET_KEY, ledger)
+
+
 for i in range(1, 101):
-    uni = random.choice(data.university_ledger)
-    stud = random.choice(data.student_ledger)
-    cour = random.choice(data.course_ledger)
+    uni = random.choice(BLOCKCHAIN.ledger["university"])
+    stud = random.choice(BLOCKCHAIN.ledger["student"])
+    cour = random.choice(BLOCKCHAIN.ledger["course"])
     grade = random.randint(1, 10)
     transaction = blockchain.Transaction(
         uni.university_id, stud.student_id, cour.code, grade
@@ -37,7 +46,7 @@ def university_login():
     print("----------------------------------------------------------")
     name = input("Enter university name: ")
     flag = False
-    for university in data.university_ledger:
+    for university in BLOCKCHAIN.ledger["university"]:
         if university.university_name == name:
             flag = True
             break
@@ -72,7 +81,7 @@ def university_login():
                     dob = input("Enter date of birth of student (yyyy-mm-dd): ")
                     stud = student.Student(student_id, name, gender, dob)
                     university.add_student(stud)
-                    data.student_ledger.append(stud)
+                    BLOCKCHAIN.ledger["student"].append(stud)
                     print("Student added successfully:")
                     print(stud)
                 case "2":
@@ -89,7 +98,7 @@ def university_login():
                     credits = input("Enter credits of course: ")
                     cour = course.Course(course_code, name, credits)
                     university.add_course(cour)
-                    data.course_ledger.append(cour)
+                    BLOCKCHAIN.ledger["course"].append(cour)
                     print("Course added successfully:")
                     print(cour)
                 case "3":
@@ -104,7 +113,7 @@ def company_login():
     print("----------------------------------------------------------")
     name = input("Enter company name: ")
     flag = False
-    for company in data.company_ledger:
+    for company in BLOCKCHAIN.ledger["company"]:
         if company.name == name:
             flag = True
             break
@@ -147,7 +156,7 @@ def student_login():
     university_name = input("Enter university name: ")
     student_id = input("Enter student id: ")
     flag = False
-    for university in data.university_ledger:
+    for university in BLOCKCHAIN.ledger["university"]:
         if university.university_name == university_name:
             flag = True
             break

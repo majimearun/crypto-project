@@ -49,7 +49,7 @@ class Block:
 
 
 class Blockchain:
-    def __init__(self, difficulty: int, secret_key: bytes = None):
+    def __init__(self, difficulty: int, secret_key: bytes = None, ledger: dict = None):
         self.chain: list[Block] = [self.create_genesis_block()]
         self.difficulty = difficulty
         self.temp_transactions: list[Transaction] = []
@@ -58,6 +58,7 @@ class Blockchain:
             secret_key = os.urandom(256)
             print(f"Secret Key: {secret_key}")
         self.secret_key = secret_key
+        self.ledger = ledger
 
     def last_block(self) -> Block:
         return self.chain[-1]
