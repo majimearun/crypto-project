@@ -5,6 +5,8 @@ from cryptography.hazmat.primitives import hashes, hmac
 import random
 import student
 import course
+import company
+import university
 import json
 
 N_ROUNDS = 1
@@ -46,15 +48,15 @@ def university_login():
     print("----------------------------------------------------------")
     name = input("Enter university name: ")
     flag = False
-    for university in BLOCKCHAIN.ledger["university"]:
-        if university.university_name == name:
+    for uni in BLOCKCHAIN.ledger["university"]:
+        if uni.university_name == name:
             flag = True
             break
     if not flag:
         print("University not found")
         return
 
-    auth = authenticator.ChallengeResponseAuthenticator(university.secret_key, N_ROUNDS)
+    auth = authenticator.ChallengeResponseAuthenticator(uni.secret_key, N_ROUNDS)
     if auth.authenticate(TESTING):
         print("Authenticated...")
         print("Access granted")
@@ -71,7 +73,7 @@ def university_login():
                 case "1":
                     student_id = input("Enter student id: ")
                     while True:
-                        for stud in university.students:
+                        for stud in uni.students:
                             if stud.student_id == student_id:
                                 print("Student already exists")
                                 break
@@ -86,14 +88,14 @@ def university_login():
                     except:
                         print("Invalid date of birth")
                         continue
-                    university.add_student(stud)
+                    uni.add_student(stud)
                     BLOCKCHAIN.ledger["student"].append(stud)
                     print("Student added successfully:")
                     print(stud)
                 case "2":
                     course_code = input("Enter course code: ")
                     while True:
-                        for cour in university.courses:
+                        for cour in uni.courses:
                             if cour.code == course_code:
                                 print("Course already exists")
                                 break
@@ -103,7 +105,7 @@ def university_login():
                     name = input("Enter course name: ")
                     credits = input("Enter credits of course: ")
                     cour = course.Course(course_code, name, credits)
-                    university.add_course(cour)
+                    uni.add_course(cour)
                     BLOCKCHAIN.ledger["course"].append(cour)
                     print("Course added successfully:")
                     print(cour)
@@ -111,21 +113,18 @@ def university_login():
                     while True:
                         student_id = input("Enter student id: ")
                         if any(
-                            student.student_id == student_id
-                            for student in university.students
+                            stud.student_id == student_id for stud in uni.students
                         ):
                             break
                     while True:
                         course_code = input("Enter course code: ")
-                        if any(
-                            course.code == course_code for course in university.courses
-                        ):
+                        if any(course.code == course_code for course in uni.courses):
                             break
                     grade = int(input("Enter grade: "))
                     transaction = blockchain.Transaction(
-                        university.university_id, student_id, course_code, grade
+                        uni.university_id, student_id, course_code, grade
                     )
-                    HMAC = hmac.HMAC(university.secret_key, hashes.SHA256())
+                    HMAC = hmac.HMAC(uni.secret_key, hashes.SHA256())
                     HMAC.update(transaction.to_bytes())
                     signature = HMAC.finalize()
                     if BLOCKCHAIN.add_transaction(transaction, signature):
@@ -159,14 +158,14 @@ def company_login():
     print("----------------------------------------------------------")
     name = input("Enter company name: ")
     flag = False
-    for company in BLOCKCHAIN.ledger["company"]:
-        if company.name == name:
+    for comp in BLOCKCHAIN.ledger["company"]:
+        if comp.name == name:
             flag = True
             break
     if not flag:
         print("Company not found")
         return
-    auth = authenticator.ChallengeResponseAuthenticator(company.secret_key, N_ROUNDS)
+    auth = authenticator.ChallengeResponseAuthenticator(comp.secret_key, N_ROUNDS)
     if auth.authenticate(TESTING):
         print("Authenticated...")
         print("Access granted")
@@ -203,22 +202,22 @@ def student_login():
     university_name = input("Enter university name: ")
     student_id = input("Enter student id: ")
     flag = False
-    for university in BLOCKCHAIN.ledger["university"]:
-        if university.university_name == university_name:
+    for uni in BLOCKCHAIN.ledger["university"]:
+        if uni.university_name == university_name:
             flag = True
             break
     if not flag:
         print("University not found")
         return
     flag = False
-    for student in university.students:
-        if student.student_id == student_id:
+    for stud in uni.students:
+        if stud.student_id == student_id:
             flag = True
             break
     if not flag:
         print("Student not found")
         return
-    auth = authenticator.ChallengeResponseAuthenticator(student.secret_key, N_ROUNDS)
+    auth = authenticator.ChallengeResponseAuthenticator(stud.secret_key, N_ROUNDS)
     if auth.authenticate(TESTING):
         print("Authenticated...")
         print("Access granted")
@@ -231,7 +230,7 @@ def student_login():
             match choice:
                 case "1":
                     found, transcript = BLOCKCHAIN.view_student_transcript(
-                        university.university_id, student_id
+                        uni.university_id, student_id
                     )
                     if found:
                         json_transcript = json.dumps(transcript, indent=4)
@@ -246,11 +245,53 @@ def student_login():
                     print("Invalid choice")
 
 
+def new_user():
+    print("----------------------------------------------------------")
+    print("----------------------New User Login----------------------")
+    print("----------------------------------------------------------")
+    print("Select type of user")
+    print("1. University")
+    print("2. Company")
+    choice = input("Enter choice: ")
+    match choice:
+        case "1":
+            university_id = input("Enter university id: ")
+            if any(
+                uni.university_id == university_id
+                for uni in BLOCKCHAIN.ledger["university"]
+            ):
+                print("University already exists")
+                return
+            name = input("Enter university name: ")
+            if any(
+                uni.university_name == name for uni in BLOCKCHAIN.ledger["university"]
+            ):
+                print("University already exists")
+                return
+            uni = university.University(university_id, name)
+            BLOCKCHAIN.ledger["university"].append(uni)
+            print("University added successfully")
+        case "2":
+            name = input("Enter company name: ")
+            if any(comp.name == name for comp in BLOCKCHAIN.ledger["company"]):
+                print("Company already exists")
+                return
+            comp = company.Company(name)
+            BLOCKCHAIN.ledger["company"].append(comp)
+            print("Company added successfully")
+        case _:
+            print("Invalid choice")
+
+
 if __name__ == "__main__":
     while True:
-        print("Login as ...\n1. University\n2. Student\n3. Company\n4. Exit")
+        print(
+            "Login as ...\n0. New user\n1. University\n2. Student\n3. Company\n4. Exit"
+        )
         choice = input("Enter choice: ")
         match choice:
+            case "0":
+                new_user()
             case "1":
                 university_login()
             case "2":
