@@ -173,9 +173,10 @@ class Blockchain:
             previous_hash = block.hash
         return True
 
+    # View Users
     def view_student_transcript(
         self, university_id: str, student_id: str
-    ) -> tuple[bool, dict]:
+    ) -> tuple[bool, dict, float]:
         if not self.is_chain_valid():
             return False, {}, 0
         student_transcript = {}
@@ -200,6 +201,19 @@ class Blockchain:
                     value += course.credits * student_transcript[course_code]
                     break
         return True, student_transcript, value / ncreds
+    
+    def view_uni_grades(
+        self, university_id: str
+    ) -> tuple[bool, list[tuple]]:
+        if not self.is_chain_valid():
+            return False, ()
+        uni_grades = []
+        for block in self.chain:
+            for transaction in block.transactions:
+                transaction = Transaction(**transaction)
+                if transaction.university_id == university_id:
+                    uni_grades.append((transaction.student_id, transaction.code, transaction.grade))
+        return True, uni_grades
 
 
 if __name__ == "__main__":

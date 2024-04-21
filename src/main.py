@@ -67,7 +67,8 @@ def university_login():
             print("2. Add Course")
             print("3. Create new entry")
             print("4. View student transcript")
-            print("5. Exit")
+            print("5. View all grades in university")
+            print("6. Exit")
             choice = input("Enter choice: ")
             match choice:
                 case "1":
@@ -112,9 +113,7 @@ def university_login():
                 case "3":
                     while True:
                         student_id = input("Enter student id: ")
-                        if any(
-                            stud.student_id == student_id for stud in uni.students
-                        ):
+                        if any(stud.student_id == student_id for stud in uni.students):
                             break
                     while True:
                         course_code = input("Enter course code: ")
@@ -134,20 +133,25 @@ def university_login():
                     if len(BLOCKCHAIN.temp_transactions) == 10:
                         BLOCKCHAIN.mine()
                 case "4":
-                    university_id = input("Enter university id: ")
                     student_id = input("Enter student id: ")
                     found, transcript, cgpa = BLOCKCHAIN.view_student_transcript(
-                        university_id, student_id
+                        uni.university_id, student_id
                     )
                     if found:
                         json_transcript = json.dumps(transcript, indent=4)
                         print(f"CGPA: {cgpa}")
                         print(json_transcript)
                     else:
-                        print(
-                            "Error viewing transcript, either student or university not found"
-                        )
+                        print("Student has no courses")
                 case "5":
+                    found, uni_grades = BLOCKCHAIN.view_uni_grades(uni.university_id)
+                    if found:
+                        print("Grades:")
+                        for student_id, course_code, grade in uni_grades:
+                            print(f"{student_id} {course_code} {grade}")
+                    else:
+                        print("No grades found")
+                case "6":
                     return
                 case _:
                     print("Invalid choice")
