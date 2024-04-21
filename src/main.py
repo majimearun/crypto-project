@@ -32,7 +32,7 @@ ledger = {
 BLOCKCHAIN = blockchain.Blockchain(DIFFICULTY, ledger)
 
 
-for i in range(1, 101):
+for i in range(1, 109):
     uni = random.choice(BLOCKCHAIN.ledger["university"])
     stud = random.choice(BLOCKCHAIN.ledger["student"])
     cour = random.choice(BLOCKCHAIN.ledger["course"])
