@@ -8,10 +8,17 @@ from course import Course
 from company import Company
 from university import University
 import json
+import argparse
 
-N_ROUNDS = 1
-DIFFICULTY = 2
-TESTING = True
+parser = argparse.ArgumentParser()
+parser.add_argument("--difficulty", type=int, default=2)
+parser.add_argument("--testing", type=bool, default=False)
+parser.add_argument("--rounds", type=int, default=1)
+args = parser.parse_args()
+
+N_ROUNDS = args.rounds
+DIFFICULTY = args.difficulty
+TESTING = args.testing
 
 # create some transactions in the block chain
 data = Data()
