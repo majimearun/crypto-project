@@ -136,11 +136,12 @@ def university_login():
                 case "4":
                     university_id = input("Enter university id: ")
                     student_id = input("Enter student id: ")
-                    found, transcript = BLOCKCHAIN.view_student_transcript(
+                    found, transcript, cgpa = BLOCKCHAIN.view_student_transcript(
                         university_id, student_id
                     )
                     if found:
                         json_transcript = json.dumps(transcript, indent=4)
+                        print(f"CGPA: {cgpa}")
                         print(json_transcript)
                     else:
                         print(
@@ -179,11 +180,12 @@ def company_login():
                 case "1":
                     university_id = input("Enter university id: ")
                     student_id = input("Enter student id: ")
-                    found, transcript = BLOCKCHAIN.view_student_transcript(
+                    found, transcript, cgpa = BLOCKCHAIN.view_student_transcript(
                         university_id, student_id
                     )
                     if found:
                         json_transcript = json.dumps(transcript, indent=4)
+                        print(f"CGPA: {cgpa}")
                         print(json_transcript)
                     else:
                         print(
@@ -217,6 +219,7 @@ def student_login():
     if not flag:
         print("Student not found")
         return
+    print(stud.secret_key)
     auth = authenticator.ChallengeResponseAuthenticator(stud.secret_key, N_ROUNDS)
     if auth.authenticate(TESTING):
         print("Authenticated...")
@@ -229,11 +232,12 @@ def student_login():
             choice = input("Enter choice: ")
             match choice:
                 case "1":
-                    found, transcript = BLOCKCHAIN.view_student_transcript(
+                    found, transcript, cgpa = BLOCKCHAIN.view_student_transcript(
                         uni.university_id, student_id
                     )
                     if found:
                         json_transcript = json.dumps(transcript, indent=4)
+                        print(f"CGPA: {cgpa}")
                         print(json_transcript)
                     else:
                         print(

@@ -2,8 +2,6 @@ from cryptography.hazmat.primitives import hashes, hmac
 import json
 import hashlib
 import datetime as dt
-import os
-
 
 class Transaction:
     def __init__(self, university_id: str, student_id: str, code: str, grade: int):
@@ -177,7 +175,7 @@ class Blockchain:
         self, university_id: str, student_id: str
     ) -> tuple[bool, dict]:
         if not self.is_chain_valid():
-            return False, {}
+            return False, {}, 0
         student_transcript = {}
         for block in self.chain:
             for transaction in block.transactions:
@@ -187,7 +185,19 @@ class Blockchain:
                     and transaction.university_id == university_id
                 ):
                     student_transcript[transaction.code] = transaction.grade
-        return True, student_transcript
+                    
+        ncreds = 0
+        value = 0
+        for university in self.ledger["university"]:
+            if university.university_id == university_id:
+                break
+        for course_code in student_transcript:
+            for course in university.courses:
+                if course.code == course_code:
+                    ncreds += course.credits
+                    value += course.credits * student_transcript[course_code]
+                    break
+        return True, student_transcript, value / ncreds
 
 
 if __name__ == "__main__":
