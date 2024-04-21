@@ -210,6 +210,8 @@ class Blockchain:
                     ncreds += course.credits
                     value += course.credits * student_transcript[course_code]
                     break
+        if ncreds == 0:
+            return True, student_transcript, 0
         return True, student_transcript, value / ncreds
 
     def view_uni_grades(self, university_id: str) -> tuple[bool, list[tuple]]:

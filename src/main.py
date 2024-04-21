@@ -3,14 +3,14 @@ import blockchain
 from seed import Data
 from cryptography.hazmat.primitives import hashes, hmac
 import random
-import student
-import course
-import company
-import university
+from student import Student
+from course import Course
+from company import Company
+from university import University
 import json
 
 N_ROUNDS = 1
-DIFFICULTY = 4
+DIFFICULTY = 2
 TESTING = True
 
 # create some transactions in the block chain
@@ -85,7 +85,7 @@ def university_login():
                     gender = input("Enter gender of student: ")
                     dob = input("Enter date of birth of student (yyyy-mm-dd): ")
                     try:
-                        stud = student.Student(student_id, name, gender, dob)
+                        stud = Student(student_id, name, gender, dob)
                     except:
                         print("Invalid date of birth")
                         continue
@@ -105,7 +105,7 @@ def university_login():
                         course_code = input("Enter course code: ")
                     name = input("Enter course name: ")
                     credits = input("Enter credits of course: ")
-                    cour = course.Course(course_code, name, credits)
+                    cour = Course(course_code, name, credits)
                     uni.add_course(cour)
                     BLOCKCHAIN.ledger["course"].append(cour)
                     print("Course added successfully:")
@@ -276,7 +276,7 @@ def new_user():
             ):
                 print("University already exists")
                 return
-            uni = university.University(university_id, name)
+            uni = University(university_id, name)
             BLOCKCHAIN.ledger["university"].append(uni)
             print("University added successfully")
         case "2":
@@ -284,7 +284,7 @@ def new_user():
             if any(comp.name == name for comp in BLOCKCHAIN.ledger["company"]):
                 print("Company already exists")
                 return
-            comp = company.Company(name)
+            comp = Company(name)
             BLOCKCHAIN.ledger["company"].append(comp)
             print("Company added successfully")
         case _:
