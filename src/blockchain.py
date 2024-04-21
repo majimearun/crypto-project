@@ -192,7 +192,13 @@ class Blockchain:
                     and transaction.university_id == university_id
                 ):
                     student_transcript[transaction.code] = transaction.grade
-
+        for transaction in self.temp_transactions:
+            transaction = Transaction(**transaction)
+            if (
+                transaction.student_id == student_id
+                and transaction.university_id == university_id
+            ):
+                student_transcript[transaction.code] = transaction.grade
         ncreds = 0
         value = 0
         for university in self.ledger["university"]:
@@ -217,6 +223,12 @@ class Blockchain:
                     uni_grades.append(
                         (transaction.student_id, transaction.code, transaction.grade)
                     )
+        for transaction in self.temp_transactions:
+            transaction = Transaction(**transaction)
+            if transaction.university_id == university_id:
+                uni_grades.append(
+                    (transaction.student_id, transaction.code, transaction.grade)
+                )
         return True, uni_grades
 
 
